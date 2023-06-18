@@ -12,5 +12,5 @@ public interface FileService {
 	List<FileDto> getAllFiles();
 	FileDto getOneDto(String Id);
 	Boolean deleteFile(String name);
-	String getFile(String name);
+	byte[] getFile(String name);
 }

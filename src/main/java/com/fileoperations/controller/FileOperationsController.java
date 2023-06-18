@@ -1,12 +1,13 @@
 package com.fileoperations.controller;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fileoperations.Util.FileExtentions;
 import com.fileoperations.dto.FileDto;
 import com.fileoperations.exception.customException.FileExtensionException;
 import com.fileoperations.service.Impl.FileServiceImpl;
@@ -86,8 +88,8 @@ public class FileOperationsController {
 			@ApiResponse(responseCode = "401", description = "Unauthorized"),
 	})
 	@DeleteMapping("/delete/{filename}")
-	  public ResponseEntity<String> delete(@PathVariable String filename) {
-	    
+	public ResponseEntity<String> delete(@PathVariable String filename) {
+    
 	    try {
 	      boolean existed = fileServiceImpl.deleteFile(filename);
 	      
@@ -100,6 +102,19 @@ public class FileOperationsController {
 	    }
 	}
 	
+	
+	@GetMapping(value = "/getfile/{filename}")
+	public @ResponseBody ResponseEntity<byte[]> getImageWithMediaType(@PathVariable String filename) throws IOException {
+		HttpHeaders headers = new HttpHeaders();
+		MediaType mediaType = FileExtentions.getContentType(filename);
+	    headers.setContentType(mediaType);
+	    
+		byte[] bb = fileServiceImpl.getFile(filename);
+		
+	    return new  ResponseEntity<byte[]>(bb, headers, HttpStatus.OK);
+	}
+	
+	
 	@ExceptionHandler(MaxUploadSizeExceededException.class)
 	public ResponseEntity<String> maxUploadSizeExceeded(MaxUploadSizeExceededException e) {
 	    return ResponseEntity.badRequest().body("File Too Large");
@@ -109,4 +124,5 @@ public class FileOperationsController {
 	public ResponseEntity<String> fileExtensionException(FileExtensionException e) {
 	    return ResponseEntity.badRequest().body("File extension is not correct");
 	}
+
 }
