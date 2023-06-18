@@ -37,11 +37,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 public class FileOperationsController {
 	
 	private final FileServiceImpl fileServiceImpl;
+	private final JwtTokenProvider jwtTokenProvider;
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(FileOperationsController.class);
 	
-	public FileOperationsController(FileServiceImpl fileServiceImpl) {
+	public FileOperationsController(FileServiceImpl fileServiceImpl, JwtTokenProvider jwtTokenProvider) {
 		this.fileServiceImpl = fileServiceImpl;
+		this.jwtTokenProvider = jwtTokenProvider;
 	}
 
 	@Operation(summary = "Save new file")
@@ -52,7 +54,7 @@ public class FileOperationsController {
 	})
 	@PostMapping("/uploadFile")
 	public ResponseEntity<FileDto> hanleFileUpload(@RequestParam("file") MultipartFile file, @RequestHeader (name="Authorization") String token){
-		String user = JwtTokenProvider.getUsernameFromJWT(token.split(" ")[1]);
+		String user = jwtTokenProvider.getUsernameFromJWT(token.split(" ")[1]);
 		LOGGER.info(user + " accessed to getAllFileInfo api");
 		FileDto newFileDto = fileServiceImpl.saveNewFile(file);;
 		
@@ -66,7 +68,7 @@ public class FileOperationsController {
 	})
 	@GetMapping("/getAllFileInfo")
 	public ResponseEntity<List<FileDto>> getAllFileInfo(@RequestHeader (name="Authorization") String token){
-		String user = JwtTokenProvider.getUsernameFromJWT(token.split(" ")[1]);
+		String user = jwtTokenProvider.getUsernameFromJWT(token.split(" ")[1]);
 		LOGGER.info(user + " accessed to getAllFileInfo api");
 		
 		List<FileDto> allFileInfo = fileServiceImpl.getAllFiles();
@@ -81,7 +83,7 @@ public class FileOperationsController {
 	})
 	@GetMapping("/getFileInfo/{id}")
 	public ResponseEntity<FileDto> getFileInfo(@PathVariable String id, @RequestHeader (name="Authorization") String token){
-		String user = JwtTokenProvider.getUsernameFromJWT(token.split(" ")[1]);
+		String user = jwtTokenProvider.getUsernameFromJWT(token.split(" ")[1]);
 		LOGGER.info(user + " accessed to getAllFileInfo api");
 		
 		FileDto fileInfo = fileServiceImpl.getOneDto(id);
@@ -96,7 +98,7 @@ public class FileOperationsController {
 	})
 	@DeleteMapping("/delete/{filename}")
 	public ResponseEntity<String> delete(@PathVariable String filename, @RequestHeader (name="Authorization") String token) {
-		String user = JwtTokenProvider.getUsernameFromJWT(token.split(" ")[1]);
+		String user = jwtTokenProvider.getUsernameFromJWT(token.split(" ")[1]);
 		LOGGER.info(user + " accessed to getAllFileInfo api");
 		
 	    try {
@@ -114,7 +116,7 @@ public class FileOperationsController {
 	
 	@GetMapping(value = "/getfile/{filename}")
 	public @ResponseBody ResponseEntity<byte[]> getImageWithMediaType(@PathVariable String filename, @RequestHeader (name="Authorization") String token) throws IOException {
-		String user = JwtTokenProvider.getUsernameFromJWT(token.split(" ")[1]);
+		String user = jwtTokenProvider.getUsernameFromJWT(token.split(" ")[1]);
 		LOGGER.info(user + " accessed to getAllFileInfo api");
 		
 		HttpHeaders headers = new HttpHeaders();
