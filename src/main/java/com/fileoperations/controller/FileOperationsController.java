@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -24,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fileoperations.Util.FileExtentions;
 import com.fileoperations.dto.FileDto;
 import com.fileoperations.exception.customException.FileExtensionException;
+import com.fileoperations.security.JwtTokenProvider;
 import com.fileoperations.service.Impl.FileServiceImpl;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,8 +51,9 @@ public class FileOperationsController {
 			@ApiResponse(responseCode = "401", description = "Unauthorized"),
 	})
 	@PostMapping("/uploadFile")
-	public ResponseEntity<FileDto> hanleFileUpload(@RequestParam("file") MultipartFile file){
-		LOGGER.info("new file contents -> "+ file.getOriginalFilename() + "size : " + file.getSize());
+	public ResponseEntity<FileDto> hanleFileUpload(@RequestParam("file") MultipartFile file, @RequestHeader (name="Authorization") String token){
+		String user = JwtTokenProvider.getUsernameFromJWT(token.split(" ")[1]);
+		LOGGER.info(user + " accessed to getAllFileInfo api");
 		FileDto newFileDto = fileServiceImpl.saveNewFile(file);;
 		
 		return new ResponseEntity<>(newFileDto,HttpStatus.OK);
@@ -62,7 +65,9 @@ public class FileOperationsController {
 			@ApiResponse(responseCode = "401", description = "Unauthorized"),
 	})
 	@GetMapping("/getAllFileInfo")
-	public ResponseEntity<List<FileDto>> getAllFileInfo(){
+	public ResponseEntity<List<FileDto>> getAllFileInfo(@RequestHeader (name="Authorization") String token){
+		String user = JwtTokenProvider.getUsernameFromJWT(token.split(" ")[1]);
+		LOGGER.info(user + " accessed to getAllFileInfo api");
 		
 		List<FileDto> allFileInfo = fileServiceImpl.getAllFiles();
 		return allFileInfo.size() > 0 ? new ResponseEntity<>(allFileInfo,HttpStatus.OK) : new ResponseEntity<>(allFileInfo,HttpStatus.NO_CONTENT);
@@ -75,7 +80,9 @@ public class FileOperationsController {
 			@ApiResponse(responseCode = "401", description = "Unauthorized"),
 	})
 	@GetMapping("/getFileInfo/{id}")
-	public ResponseEntity<FileDto> getFileInfo(@PathVariable String id){
+	public ResponseEntity<FileDto> getFileInfo(@PathVariable String id, @RequestHeader (name="Authorization") String token){
+		String user = JwtTokenProvider.getUsernameFromJWT(token.split(" ")[1]);
+		LOGGER.info(user + " accessed to getAllFileInfo api");
 		
 		FileDto fileInfo = fileServiceImpl.getOneDto(id);
 		return new ResponseEntity<>(fileInfo,HttpStatus.OK);
@@ -88,8 +95,10 @@ public class FileOperationsController {
 			@ApiResponse(responseCode = "401", description = "Unauthorized"),
 	})
 	@DeleteMapping("/delete/{filename}")
-	public ResponseEntity<String> delete(@PathVariable String filename) {
-    
+	public ResponseEntity<String> delete(@PathVariable String filename, @RequestHeader (name="Authorization") String token) {
+		String user = JwtTokenProvider.getUsernameFromJWT(token.split(" ")[1]);
+		LOGGER.info(user + " accessed to getAllFileInfo api");
+		
 	    try {
 	      boolean existed = fileServiceImpl.deleteFile(filename);
 	      
@@ -104,14 +113,17 @@ public class FileOperationsController {
 	
 	
 	@GetMapping(value = "/getfile/{filename}")
-	public @ResponseBody ResponseEntity<byte[]> getImageWithMediaType(@PathVariable String filename) throws IOException {
+	public @ResponseBody ResponseEntity<byte[]> getImageWithMediaType(@PathVariable String filename, @RequestHeader (name="Authorization") String token) throws IOException {
+		String user = JwtTokenProvider.getUsernameFromJWT(token.split(" ")[1]);
+		LOGGER.info(user + " accessed to getAllFileInfo api");
+		
 		HttpHeaders headers = new HttpHeaders();
 		MediaType mediaType = FileExtentions.getContentType(filename);
 	    headers.setContentType(mediaType);
 	    
-		byte[] bb = fileServiceImpl.getFile(filename);
-		
-	    return new  ResponseEntity<byte[]>(bb, headers, HttpStatus.OK);
+		byte[] fileContent = fileServiceImpl.getFile(filename);
+
+	    return fileContent == null ?  new ResponseEntity<byte[]>(null, headers, HttpStatus.BAD_REQUEST): new ResponseEntity<byte[]>(fileContent, headers, HttpStatus.OK);
 	}
 	
 	

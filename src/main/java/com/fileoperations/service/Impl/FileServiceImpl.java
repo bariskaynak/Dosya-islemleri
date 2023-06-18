@@ -1,5 +1,6 @@
 package com.fileoperations.service.Impl;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -105,7 +106,7 @@ public class FileServiceImpl implements FileService{
 	 */
 	@Override
 	public FileDto getOneDto(String id) {
-		File file = fileRepository.findById(id).orElseThrow(() -> new NotFoundException("File Does not exist"));
+		File file = fileRepository.findById(id).orElseThrow(() -> new NotFoundException("File not exist"));
 		return this.mapper.map(file, FileDto.class);
 	}
 
@@ -139,9 +140,9 @@ public class FileServiceImpl implements FileService{
 			return bytes;
 		} catch (IOException e) {
 			LOGGER.error("File Not Found => " + name);
+			return null;
 		}
 		
-		return null;
 	}
 
 }
