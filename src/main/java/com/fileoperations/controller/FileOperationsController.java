@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -32,6 +34,8 @@ public class FileOperationsController {
 	
 	private final FileServiceImpl fileServiceImpl;
 	
+	private static final Logger LOGGER = LoggerFactory.getLogger(FileOperationsController.class);
+	
 	public FileOperationsController(FileServiceImpl fileServiceImpl) {
 		this.fileServiceImpl = fileServiceImpl;
 	}
@@ -44,15 +48,10 @@ public class FileOperationsController {
 	})
 	@PostMapping("/uploadFile")
 	public ResponseEntity<FileDto> hanleFileUpload(@RequestParam("file") MultipartFile file){
-		HttpStatus status = HttpStatus.OK;
-		FileDto newFileDto = null;
+		LOGGER.info("new file contents -> "+ file.getOriginalFilename() + "size : " + file.getSize());
+		FileDto newFileDto = fileServiceImpl.saveNewFile(file);;
 		
-			newFileDto = fileServiceImpl.saveNewFile(file);
-			
-	
-		
-
-		return new ResponseEntity<>(newFileDto,status);
+		return new ResponseEntity<>(newFileDto,HttpStatus.OK);
 	}
 	
 	@Operation(summary = "Get all file info")
