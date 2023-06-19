@@ -84,7 +84,7 @@ public class FileOperationsController {
 	@GetMapping("/getFileInfo/{id}")
 	public ResponseEntity<FileDto> getFileInfo(@PathVariable String id, @RequestHeader (name="Authorization") String token){
 		String user = jwtTokenProvider.getUsernameFromJWT(token.split(" ")[1]);
-		LOGGER.info(user + " accessed to getAllFileInfo api");
+		LOGGER.info(user + " accessed to getFileInfo api");
 		
 		FileDto fileInfo = fileServiceImpl.getOneDto(id);
 		return new ResponseEntity<>(fileInfo,HttpStatus.OK);
@@ -99,7 +99,7 @@ public class FileOperationsController {
 	@DeleteMapping("/delete/{filename}")
 	public ResponseEntity<String> delete(@PathVariable String filename, @RequestHeader (name="Authorization") String token) {
 		String user = jwtTokenProvider.getUsernameFromJWT(token.split(" ")[1]);
-		LOGGER.info(user + " accessed to getAllFileInfo api");
+		LOGGER.info(user + " accessed to delete api");
 		
 	    try {
 	      boolean existed = fileServiceImpl.deleteFile(filename);
@@ -117,7 +117,7 @@ public class FileOperationsController {
 	@GetMapping(value = "/getfile/{filename}")
 	public @ResponseBody ResponseEntity<byte[]> getImageWithMediaType(@PathVariable String filename, @RequestHeader (name="Authorization") String token) throws IOException {
 		String user = jwtTokenProvider.getUsernameFromJWT(token.split(" ")[1]);
-		LOGGER.info(user + " accessed to getAllFileInfo api");
+		LOGGER.info(user + " accessed to getfile api");
 		
 		HttpHeaders headers = new HttpHeaders();
 		MediaType mediaType = FileExtentions.getContentType(filename);
